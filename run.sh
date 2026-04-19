@@ -1,14 +1,12 @@
 seed=1024
-repeat=1
+repeat=3
 epoch=500
-device=cuda:1
-run=1
+device=cuda:0
 
 # CoraFull
 dataset=corafull
-budget=100
 
-for method in sage_cog
+for method in cope_gl
 do
 python train_tpp.py \
 --seed $seed \
@@ -18,5 +16,52 @@ python train_tpp.py \
 --data-dir ./data \
 --device $device \
 --result-path ./results \
---dataset-name $dataset > ./logs_sage_new/${dataset}_${method}_${run}_new.log
+--dataset-name $dataset
+done
+
+dataset=arxiv
+
+for method in cope_gl
+do
+python train_tpp.py \
+--seed $seed \
+--repeat $repeat \
+--cls-epoch $epoch \
+--cgl-method $method \
+--data-dir ./data \
+--device $device \
+--result-path ./results \
+--dataset-name $dataset
+done
+
+
+dataset=reddit
+
+for method in cope_gl
+do
+python train_tpp.py \
+--seed $seed \
+--repeat $repeat \
+--cls-epoch $epoch \
+--cgl-method $method \
+--data-dir ./data \
+--device $device \
+--result-path ./results \
+--dataset-name $dataset
+done
+
+
+dataset=products
+
+for method in cope_gl
+do
+python train_tpp.py \
+--seed $seed \
+--repeat $repeat \
+--cls-epoch $epoch \
+--cgl-method $method \
+--data-dir ./data \
+--device $device \
+--result-path ./results \
+--dataset-name $dataset
 done
