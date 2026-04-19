@@ -4,7 +4,6 @@ def get_graph_class_ratio(graph, class_id, pseudo=False):
     else:
         labels = graph.y[graph.train_mask]
         
-    # 🚨 라벨(노드)이 하나도 없는 경우 0으로 나누는 에러(ZeroDivisionError) 방지
     if len(labels) == 0:
         return 0.0
         
