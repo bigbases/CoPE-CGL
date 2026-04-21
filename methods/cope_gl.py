@@ -76,7 +76,6 @@ class SGCCommunityCGL():
         elif self.method == 'LP':
             communities = g.community_label_propagation()
         elif self.method == "infomap":
-            # 주의: infomap은 igraph 파이썬 API에서 인자 이름이 'edge_weights' 입니다.
             communities = g.community_infomap() 
         elif self.method == "fastgreedy":
             communities = g.community_fastgreedy().as_clustering()
