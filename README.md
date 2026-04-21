@@ -10,9 +10,11 @@
 - igraph 0.9.9
 
 # Dataset
-The *.streaming files are provided as compressed archives. Please extract them into the data/ folder before running the project.
+The *.streaming files are provided as compressed archives. Please extract them into the `data/` directory before running the project.
 
-Datasets can also be obtained from the PyTorch Geometric library:
+After extraction, data streams can be constructed using the `Streaming` class implemented in `data_stream.py` and `data_stream_mixed.py`.
+
+Alternatively, the datasets can be obtained via the PyTorch Geometric library:
 https://pytorch-geometric.readthedocs.io/en/latest/modules/datasets.html
 
 
