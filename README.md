@@ -10,7 +10,11 @@
 - igraph 0.9.9
 
 # Dataset
-Datasets can be obtained from [Pytorch Geometric](https://pytorch-geometric.readthedocs.io/en/latest/modules/datasets.html) library. 
+The *.streaming files are provided as compressed archives. Please extract them into the data/ folder before running the project.
+
+Datasets can also be obtained from the PyTorch Geometric library:
+https://pytorch-geometric.readthedocs.io/en/latest/modules/datasets.html
+
 
 # Acknowledgment
 This code is implemented based on CaT-CGL(https://github.com/superallen13/CaT-CGL.git) and CGLB(https://github.com/QueuQ/CGLB.git). Please refer to both for more baselines and implementation details.
