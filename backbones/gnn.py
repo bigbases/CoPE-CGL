@@ -96,6 +96,6 @@ def eval_node_classifier(model, data, incremental_cls=None):
     correct = (pred == data.y[data.test_mask]-incremental_cls[0]).sum()
     den = int(data.test_mask.sum())
     if den == 0:
-        return 0.0   # 또는 np.nan
+        return 0.0  
     acc = int(correct) / den
     return acc
