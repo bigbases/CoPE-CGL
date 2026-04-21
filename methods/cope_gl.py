@@ -5,9 +5,6 @@ from torch_geometric.utils import degree, add_self_loops
 import numpy as np
 import igraph as ig
 
-# ==========================================
-# Bottleneck Feature Adapter (BFA)
-# ==========================================
 class FeatureAdapter(nn.Module):
     def __init__(self, dim, alpha):
         super().__init__()
@@ -25,21 +22,19 @@ class FeatureAdapter(nn.Module):
     def forward(self, x):
         return x + self.alpha * self.net(x)
 
-# ==========================================
-# 2. Laplacian Smoothing-based CGL
-# ==========================================
+
 class SGCCommunityCGL():
-    def __init__(self, tasks, device, sgc_hops, alpha, max_prototypes, args, cd_algo="louvain"):
+    def __init__(self, tasks, device, sgc_hops, alpha, max_proto, args, cd_algo="louvain"):
         self.tasks = tasks
         self.device = device
         self.args = args 
         self.method = cd_algo
         self.alpha = alpha #1.0
         
-        self.max_prototypes = max_prototypes # default: 10
+        self.max_prototypes = 10 
         
-        self.sgc_hops = sgc_hops # K-hop, default: 2
-        self.d_data = tasks[0].x.shape[1]
+        self.sgc_hops = sgc_hops 
+        self.d_data = tasks[0].x.shape[1] 
         
         self.adapters = nn.ModuleList()
         self.heads = nn.ModuleList()
@@ -55,7 +50,6 @@ class SGCCommunityCGL():
         deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
         norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
         
-        # 희소 행렬(Sparse Matrix) 구성
         adj_t = torch.sparse_coo_tensor(edge_index_loop, norm, (num_nodes, num_nodes)).to(self.device)
         
         out = x
@@ -82,6 +76,7 @@ class SGCCommunityCGL():
         elif self.method == 'LP':
             communities = g.community_label_propagation()
         elif self.method == "infomap":
+            # 주의: infomap은 igraph 파이썬 API에서 인자 이름이 'edge_weights' 입니다.
             communities = g.community_infomap() 
         elif self.method == "fastgreedy":
             communities = g.community_fastgreedy().as_clustering()
@@ -122,7 +117,6 @@ class SGCCommunityCGL():
 
     @torch.no_grad()
     def infer_task_id(self, z_test, test_mask):
-        """Cosine Similarity and Majority Voting"""
         if test_mask is not None and test_mask.sum() > 0:
             test_feats = z_test[test_mask]
         else:
@@ -166,7 +160,6 @@ class SGCCommunityCGL():
             for i, c in enumerate(curr_classes):
                 y_mapped[y == c] = i
                 
-            # BFA Intialization
             adapter = FeatureAdapter(self.d_data, self.alpha).to(self.device)
             cls_head = nn.Linear(self.d_data, n_cls).to(self.device)
             nn.init.xavier_uniform_(cls_head.weight)
@@ -195,7 +188,6 @@ class SGCCommunityCGL():
                     loss.backward()
                     optimizer.step()
             
-            # Community-aware Prototype
             self.community_prototypes[k] = self.extract_community_prototypes(task, train_mask, z_base)
 
             print(f"Eval Task {k}:", end=" ")
@@ -205,7 +197,6 @@ class SGCCommunityCGL():
                 test_mask = getattr(test_task, 'test_mask', torch.ones(test_task.num_nodes, dtype=torch.bool, device=self.device))
                 
                 with torch.no_grad():
-                    # Laplacian Smoothing
                     z_test = self.get_sgc_embedding(test_task.x, test_task.edge_index, k=self.sgc_hops)
                     
                     if k == 0:
@@ -247,10 +238,10 @@ class SGCCommunityCGL():
             print(f" AP: {AP:.2f}")
             APs.append(AP)
             
-        BWT = 0
+        AF = 0
         if len(tasks) > 1:
             for t in range(len(tasks)-1):
-                BWT += performance_matrix[len(tasks)-1, t] - performance_matrix[t, t]
-            BWT = BWT / (len(tasks) - 1)
+                AF += performance_matrix[len(tasks)-1, t] - performance_matrix[t, t]
+            AF = AF / (len(tasks) - 1)
 
-        return APs[-1], np.mean(APs), BWT
+        return APs[-1], np.mean(APs), AF

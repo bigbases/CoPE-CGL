@@ -9,7 +9,7 @@ import sys
 import numpy as np
 from utilities import *
 import time
-from data_stream_mixed_new import Streaming
+from data_stream_mixed import Streaming
 from torch_geometric.data import Batch
 from backbones.gnn import train_node_classifier, train_node_classifier_batch, eval_node_classifier
 from backbones.gcn import GCN
@@ -56,16 +56,22 @@ def main():
     parser.add_argument('--repeat', type=int, default=1)
     parser.add_argument('--seed', type=int, default=1024)
     parser.add_argument('--rewrite', action='store_true')
-    parser.add_argument('--ind_task_ratio', type=float, default=0.9)
+    parser.add_argument('--ind_task_ratio', type=float, default=0.9) # inductive ratio
     
     args = parser.parse_args()
     print(args)
 
-    # Get file names.
+    # Get file names. 
     result_file_name = get_result_file_name(args)
     task_file = os.path.join(args.data_dir, "streaming", f"{args.dataset_name}.streaming")
 
     dataset = get_dataset(args)
+    if os.path.exists(task_file):
+        data_stream = torch.load(task_file)
+    else:
+        data_stream = Streaming(args.cls_per_task, dataset)
+        torch.save(data_stream, task_file)
+
     
     # Data Stream Loading
 
@@ -74,7 +80,7 @@ def main():
     #torch.save(data_stream, task_file)
 
     # Main Execution Loop
-    if args.cgl_method in ["lwf", "cope_gl"]: # Add TPP to this list
+    if args.cgl_method in ["lwf", "cope_gl",'tpp','taam','TAAM']: # Add TPP to this list
         APs = []
         AFs = []
         mAPs = []

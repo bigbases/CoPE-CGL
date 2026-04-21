@@ -16,4 +16,11 @@ Datasets can be obtained from [Pytorch Geometric](https://pytorch-geometric.read
 This code is implemented based on CaT-CGL(https://github.com/superallen13/CaT-CGL.git) and CGLB(https://github.com/QueuQ/CGLB.git). Please refer to both for more baselines and implementation details.
 
 # Run
-Run ```sh run.sh```
+- Transductive Setting
+```sh run_transductive.sh```
+
+- Inductive Setting
+```sh run_inductive.sh```
+
+- Mixed Setting
+```sh run_mixed.sh```

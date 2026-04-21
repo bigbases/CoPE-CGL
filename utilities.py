@@ -4,6 +4,8 @@ from ogb.nodeproppred import PygNodePropPredDataset
 from backbones.gcn import GCN
 from backbones.gat import GAT
 from backbones.sgc import SGC
+from backbones.taam_sgc import TAAMSGC
+
 from methods.joint import Joint
 from methods.bare import Bare
 from methods.ergnn import ERGNN
@@ -14,6 +16,8 @@ from methods.mas import MAS
 from methods.gem import GEM
 from methods.twp import TWP
 from methods.lwf import LWF
+from methods.tpp import TPP
+from methods.taam import TAAM
 
 from methods.cope_gl import SGCCommunityCGL as CoPEGL
 
@@ -33,7 +37,7 @@ def get_result_file_name(args):
             result_name += "_nonact"
     else:
         result_name = f""
-    return f"{args.dataset_name}_{args.budget}_{args.cgl_method}" + result_name
+    return f"{args.dataset_name}_{args.cgl_method}" + result_name
 
 def print_performance_matrix(performace_matrix, m_update):
     for k in range(performace_matrix.shape[0]):
@@ -69,14 +73,24 @@ def get_backbone_model(dataset, data_stream, args):
             32,
             data_stream.n_tasks * args.cls_per_task,
             2
-        )
+        ).to(args.device)
+    elif args.cgl_method in ["taam", "TAAM"]:
+        taam_args = eval(args.taam_args)
+        model = TAAMSGC(
+            dataset.num_features,
+            taam_args.get("h_dims", [256]),
+            taam_args.get("sgc_k", 2),
+            taam_args.get("dropout", 0.0),
+            taam_args.get("batch_norm", False),
+            taam_args.get("linear_bias", True),
+        ).to(args.device)
     else:
         model = SGC(
             dataset.num_features,
             256,
             data_stream.n_tasks * args.cls_per_task,
             2
-        )
+        ).to(args.device)
         # model = GCN(dataset.num_features, 256, data_stream.n_tasks * args.cls_per_task, 2)
 
     return model
@@ -93,8 +107,7 @@ def get_cgl_model(model, data_stream, args):
     elif args.cgl_method == "cgm":
         cgl_model = CGM(model, data_stream.tasks, args.budget, args.m_update, args.device, eval(args.cgm_args))
     elif args.cgl_method == "cope_gl":
-        # cgl_model = CoG(model, data_stream.tasks, args.budget, args.m_update, args.device, args.community_algo)
-        cgl_model = CoPEGL(model, data_stream.tasks, args.device,args.sgc_hops,args.alpha,args.max_prototypes,args)
+        cgl_model = CoPEGL(data_stream.tasks, args.device,args.sgc_hops,args.alpha,args.max_prototypes,args)
     elif args.cgl_method == "ewc":
         cgl_model = EWC(model, data_stream.tasks, args.device, eval(args.ewc_args))
     elif args.cgl_method == "mas":
@@ -105,5 +118,9 @@ def get_cgl_model(model, data_stream, args):
         cgl_model = TWP(model, data_stream.tasks, args.device, eval(args.twp_args))
     elif args.cgl_method == "lwf":
         cgl_model = LWF(model, data_stream.tasks, args.device, eval(args.lwf_args))
+    elif args.cgl_method in ["TAAM",'taam']:
+        cgl_model = TAAM(model, data_stream.tasks, args.device, eval(args.taam_args), args.cls_per_task)
+    elif args.cgl_method == "tpp":
+        cgl_model = TPP(model, data_stream.tasks, args.device, eval(args.tpp_args))
     
     return cgl_model
