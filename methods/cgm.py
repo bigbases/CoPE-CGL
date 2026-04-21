@@ -37,11 +37,8 @@ class CGM(Replay):
             labels_cond += [cls] * budgets[i]
         labels_cond = torch.tensor(labels_cond)
 
-        # 🚨 [핵심 수정 부분] 무조건 sum(budgets)를 쓰지 않고, 
-        # 실제로 현재 태스크를 위해 생성할 노드의 총 개수(len(labels_cond))를 사용합니다!
         actual_budget = len(labels_cond)
         
-        # 300이 아닌 실제 필요한 크기(예: 17)만큼 텐서 생성
         feat_cond = torch.nn.Parameter(torch.FloatTensor(actual_budget, task.num_features))
         feat_cond = self._initialize_feature(task, budgets, feat_cond, self.feat_init)
 
@@ -70,7 +67,7 @@ class CGM(Replay):
                     sampled_ids += random.sample(ids_at_cls, k=target_budget)
                     
             sampled_feat = task.x[sampled_ids]
-            feat_cond.data.copy_(sampled_feat) # 이제 크기가 완벽하게 일치합니다.
+            feat_cond.data.copy_(sampled_feat)
             
         elif method == "kMeans":
             sampled_ids = []
@@ -97,9 +94,7 @@ class CGM(Replay):
             
         return feat_cond
 
-    # 🚨 파라미터로 sum(budgets) 리스트 대신 actual_budget 정수를 받도록 수정
     def _condense(self, task, feat_cond, labels_cond, actual_budget):
-        # SparseTensor 생성 시에도 300 고정이 아닌 실제 개수 기반으로 생성
         self_loops = SparseTensor.eye(actual_budget, actual_budget).t()
         opt_feat = torch.optim.Adam([feat_cond], lr=self.feat_lr)
 
@@ -127,7 +122,6 @@ class CGM(Replay):
                 dist = torch.mean(real_emb_at_class, 0) - torch.mean(cond_emb_at_class, 0)
                 loss += torch.sum(dist ** 2)
         
-            # 🚨 [최종 수정 부분] 학습할 데이터가 존재하여 loss가 업데이트(requires_grad=True) 되었을 때만 역전파!
             if loss.requires_grad:
                 opt_feat.zero_grad()
                 loss.backward()
