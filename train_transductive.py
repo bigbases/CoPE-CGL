@@ -24,8 +24,8 @@ def main():
     # Argumnets for CGL methods.
     parser.add_argument('--tim', action='store_true')
     parser.add_argument('--cgl-method', type=str, default="cgm")
-    parser.add_argument('--cls-epoch', type=int, default=200) # Reduced for TPP prompt tuning speed
-    parser.add_argument('--hidden', type=int, default=256) # TPP needs hidden dim info
+    parser.add_argument('--cls-epoch', type=int, default=200) 
+    parser.add_argument('--hidden', type=int, default=256) 
 
     # Method specific args
     parser.add_argument('--lwf-args', type=str, default="{'lambda_dist': 10., 'T': 20.}")
