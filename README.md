@@ -12,6 +12,8 @@
 # Dataset
 The *.streaming files are provided as compressed archives. Please extract them into the `data/` directory before running the project.
 
+If the files are unavailable, download the dataset from this [Dropbox link](https://www.dropbox.com/scl/fi/xwmu1z8bkxpvwp8mo7f98/streaming.zip?rlkey=osuzzil4myf7hwk89jqll7wgf&st=0757ra29&dl=0).
+
 After extraction, data streams can be constructed using the `Streaming` class implemented in `data_stream.py` and `data_stream_mixed.py`.
 
 Alternatively, the datasets can be obtained via the PyTorch Geometric library:
