@@ -19,7 +19,7 @@ from methods.lwf import LWF
 from methods.tpp import TPP
 from methods.taam import TAAM
 
-from methods.cope_gl import SGCCommunityCGL as CoPEGL
+from methods.cope_cgl import SGCCommunityCGL as CoPEGL
 
 def get_result_file_name(args):
     if args.cgl_method == "ergnn":
