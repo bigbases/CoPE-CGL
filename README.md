@@ -5,7 +5,8 @@
 
 # Dependencies
 - Python 3.9
-- torch_Geometric 2.1
+- torch 2.4.1
+- torch_Geometric 2.6
 - networkx 3.1
 - igraph 0.9.9
 
